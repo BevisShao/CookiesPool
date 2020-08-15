@@ -1,11 +1,14 @@
 import requests
 from lxml import etree
-
+from cookiespool.config import IPSPOOL_HOST, IPSPOOL_PORT
 
 # 通过IP池对外接口获得可用IP地址
 def get_IP():
-    reqs = requests.get('http://localhost:5555/random')
+    url = 'http://{}:{}/random'.format(IPSPOOL_HOST, IPSPOOL_PORT)
+    print('代理池接口地址：', url)
+    reqs = requests.get(url=url)
     code = reqs.status_code
+    print('代理池界面响应码：', code)
     if code == 200:
         # html = etree.HTML(reqs.text)
         # print(reqs.content)

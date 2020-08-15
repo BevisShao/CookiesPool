@@ -17,7 +17,8 @@ from utils.cookies import utils_cookies
 import os
 
 TEMPLATES_FOLDER = dirname(abspath(__file__)) + '/templates/'
-
+CURRENT_FOLDER = dirname(abspath(__file__))
+ROOT_FOLDER = CURRENT_FOLDER + '/../../'
 
 class WeiboCookies():
 
@@ -28,6 +29,7 @@ class WeiboCookies():
         self.username = username
         self.password = password
         self.count = 0              # 计数器，协助计算当前main（）方法是因为断网后第几次执行
+        print('ROOT_FOLDER:{}'.format(ROOT_FOLDER))
 
     def quit_loginin(self):
         cookies = self.browser.get_cookies()
@@ -63,7 +65,7 @@ class WeiboCookies():
             file = BytesIO(resqs.content)
             img = Image.open(file)
             img = img.convert('RGB')
-            img.save(r'E:\InstallLocation\PyCharm\Spiders\CookiesPool-master\login\weibo\yzmImages\yzm.jpg')
+            img.save(ROOT_FOLDER + '/login/weibo/yzmImages/yzm.jpg')
             print('验证码图片已保存。')
         else:
             print('验证码图片下载异常')
@@ -72,7 +74,7 @@ class WeiboCookies():
     # 将图片传给超级鹰的后台：
     def upload_yzm(self):
         self.chaojiying = Chaojiying_Client('your_name', 'your_psw', 'others')  # 用户中心>>软件ID 生成一个替换 96001
-        im = open(r'E:\InstallLocation\PyCharm\Spiders\CookiesPool-master\login\weibo\yzmImages\yzm.jpg', 'rb').read()  # 本地图片文件路径 来替换 a.jpg 有时WIN系统须要//
+        im = open(ROOT_FOLDER + '/login/weibo/yzmImages/yzm.jpg', 'rb').read()  # 本地图片文件路径 来替换 a.jpg 有时WIN系统须要//
         imdict = self.chaojiying.PostPic(im, 1902)   # 1902 验证码类型  官方网站>>价格体系 3.4+版 print 后要加()
         print(imdict, '超级鹰后台返回数据')
         imgSummary = imdict.get('pic_str')
@@ -130,15 +132,15 @@ class WeiboCookies():
                         else:
                             if yzmsummary:
                                 os.rename(
-                                    r'E:\InstallLocation\PyCharm\Spiders\CookiesPool-master\login\weibo\yzmImages\yzm.jpg',
-                                    r'E:\InstallLocation\PyCharm\pictures-weibo\{}.jpg'.format(yzmsummary))
+                                    ROOT_FOLDER + '/login/weibo/yzmImages/yzm.jpg',
+                                    ROOT_FOLDER + '/../pictures-weibo/{}.jpg'.format(yzmsummary))
                     self.show_welcome()
                 self.count = 0
             except TimeoutException as e:
                 print('未出现验证码控件')
                 submit.click()
-                if self.password_error():
-                    print('账号或密码错误')
+                # if self.password_error():
+                #     print('账号或密码错误')
 
         except TimeoutException as e:
             self.count += 1
@@ -171,7 +173,7 @@ class WeiboCookies():
             print('password_error_cancel {}'.format(password_error_cancel))
             if password_error_text:
                 print('password_error_cancel {}'.format(password_error_cancel))
-                self.browser.execute_script('arguments[0].click()', password_error_cancel)      # 普通的点击无效，用这个。
+                # self.browser.execute_script('arguments[0].click()', password_error_cancel)      # 普通的点击无效，用这个。
             return password_error_text
         except TimeoutException:
             return False
@@ -181,10 +183,10 @@ class WeiboCookies():
         判断是否登录成功
         :return:
         """
-        print("成功与否判断")
-        usrbt = WebDriverWait(self.browser, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.WB_innerwrap .nameBox')))    # fold_cont clearfix
-        print('usrbt: {}'.format(usrbt))
         try:
+            print("成功与否判断")
+            usrbt = WebDriverWait(self.browser, 2).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.WB_innerwrap .nameBox')))    # fold_cont clearfix
+            print('usrbt: {}'.format(usrbt))
             return usrbt
         except TimeoutException:
             return False
@@ -193,7 +195,7 @@ class WeiboCookies():
     def show_welcome(self):
         # W_btn_big
         try:
-            welcome = WebDriverWait(self.browser, 1).until(EC.presence_of_element_located((By.CLASS_NAME, 'W_btn_big')))
+            welcome = WebDriverWait(self.browser, 1.5).until(EC.element_to_be_clickable((By.CLASS_NAME, 'W_btn_big'))) # W_btn_big
             if welcome:
                 welcome.click()
                 return True
@@ -215,7 +217,7 @@ class WeiboCookies():
         self.open()
         if self.password_error():
             print('用户名或密码错误')
-            self.browser.quit()
+            # self.browser.quit()
             return {
                 'status': 2,
                 'content': '用户名或密码错误'
@@ -250,10 +252,10 @@ class WeiboCookies():
 
 
 if __name__ == '__main__':
-    driver_path = 'E:\InstallLocation\Chrome\_71_0_3578\chromedriver.exe'
+    # driver_path = 'E:\InstallLocation\Chrome\_71_0_3578\chromedriver.exe'
     chrome_options = Options()
     # chrome_options.add_argument('--headless')
-    browser = webdriver.Chrome(executable_path=driver_path, options=chrome_options)
+    browser = webdriver.Chrome(options=chrome_options)
     browser.maximize_window()
     result = WeiboCookies(username='username', password='password', browser=browser).main()
 

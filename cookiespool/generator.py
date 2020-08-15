@@ -6,6 +6,7 @@ from cookiespool.config import *
 from cookiespool.db import RedisClient
 from login.weibo.cookies import WeiboCookies
 import time
+import os
 
 
 class CookiesGenerator(object):
@@ -28,21 +29,28 @@ class CookiesGenerator(object):
         通过browser参数初始化全局浏览器供模拟登录使用
         :return:
         """
+        self.host = os.environ.get('ISDOCKER')
+        print('host = ', self.host)
+        self.caps = DesiredCapabilities.PHANTOMJS
+        self.caps["phantomjs.page.settings.userAgent"] = \
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
         if BROWSER_TYPE == 'PhantomJS':
-            caps = DesiredCapabilities.PHANTOMJS
-            caps[
-                "phantomjs.page.settings.userAgent"] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
-            self.browser = webdriver.PhantomJS(desired_capabilities=caps)
+            if self.host:
+                self.browser = webdriver.Remote(
+                    # command_executor='http://192.168.0.112:8910', desired_capabilities=caps)
+                    command_executor='http://{}:8910'.format(PHANTOMJS_HOST_DOCKER), desired_capabilities=self.caps)
+            else:
+                self.browser = webdriver.PhantomJS(desired_capabilities=self.caps)
             # self.browser.set_window_size(1400, 500)
             self.browser.maximize_window()
         elif BROWSER_TYPE == 'Chrome':
-            driver_path = 'E:\InstallLocation\Chrome\_71_0_3578\chromedriver.exe'
+            # driver_path = 'E:\InstallLocation\Chrome\_71_0_3578\chromedriver.exe'
             chrome_options = Options()
-            chrome_options.add_argument('--headless')
+            # chrome_options.add_argument('--headless')
             chrome_options.add_argument('disable-infobars')     # 去除‘自动化测试’字样
             chrome_options.add_argument('window-size=1920,1080')
             # chrome_options.add_argument('--disable-gpu')
-            self.browser = webdriver.Chrome(executable_path=driver_path, chrome_options=chrome_options)
+            self.browser = webdriver.Chrome(chrome_options=chrome_options)
             self.browser.maximize_window()
             # self.browser.fullscreen_window()
 
@@ -94,11 +102,13 @@ class CookiesGenerator(object):
                 # 密码错误，移除账号
                 elif result.get('status') == 2:
                     print(result.get('content'))
-                    self.browser.close()
+                    self.close()
                     if self.accounts_db.delete(username):
                         print('成功删除账号')
                 else:
-                    self.browser.close()
+                    with open('wangluo_error.html', 'w') as f:
+                        f.write(self.browser.page_source)
+                    self.close()
                     print('关闭浏览器后：', result.get('content'))
         else:
             print('所有账号都已经成功获取Cookies')
@@ -110,7 +120,7 @@ class CookiesGenerator(object):
         """
         try:
             print('Closing Browser')
-            if self.browser:
+            if self.__dict__.get('browser'):
                 self.browser.close()
                 self.browser.quit()
                 del self.browser

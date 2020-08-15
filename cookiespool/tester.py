@@ -17,8 +17,12 @@ class ValidTester(object):
     
     def run(self):
         cookies_groups = self.cookies_db.all()
-        for username, cookies in cookies_groups.items():
-            self.test(username, cookies)
+        if cookies_groups:
+            for username, cookies in cookies_groups.items():
+                self.test(username, cookies)
+        else:
+            # Scheduler.generate_cookie(cycle=CYCLE_GENERA)
+            print("cookies枯竭...")
 
 
 class WeiboValidTester(ValidTester):
@@ -36,11 +40,30 @@ class WeiboValidTester(ValidTester):
             return
         try:
             test_url = TEST_URL_MAP[self.website]
+            headers = {
+                'Host': 'weibo.com',
+                # 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.132 Safari/537.36',
+                # "User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.100 Safari/537.36",
+                # 'x-requested-with': 'XMLHttpRequest',  # ajxa
+                'user-agent: Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/81.0.4044.138 Chrome/81.0.4044.138 Safari/537.36'
+                'scheme': 'https',
+                # 'X-Forwarded-For': '-',
+                'Connection': 'keep-alive',
+                # 'TE': 'Trailers',
+                'Upgrade-Insecure-Requests': 1,
+                'authority': 'weibo.com',
+                'method': 'GET',
+                'path': '/'
+
+            }
             proxies = iputil.get_proxy()
             print('获得的代理IP： {}'.format(proxies))
             # response1 = requests.get('http://httpbin.org/get', proxies=proxies, )
             # print('httpbin的报文：{}'.format(response1.text))
-            response = requests.get(test_url, cookies=cookies, timeout=5, allow_redirects=True)
+            s = requests.session()
+            requests.DEFAULT_RETRIES = 5
+            s.keep_alive = False
+            response = s.get(test_url, cookies=cookies, timeout=5, allow_redirects=True)
             # response = pr.get(url=test_url, cookies=cookies, timeout=5, allow_redirects=True)
             current_url = response.url
             print('此时的网页url为：{}'.format(current_url))

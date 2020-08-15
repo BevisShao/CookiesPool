@@ -2,6 +2,7 @@ import requests
 import os
 
 from cookiespool.db import RedisClient
+from os.path import dirname,abspath
 
 conn = RedisClient('accounts', 'weibo')
 #手动输入账号密码对以4个连接线做间隔
@@ -19,7 +20,9 @@ def scan():
     #     if account == 'exit':
     #         break
     #     set(account)
-    with open('../login/weibo/accunts.txt', 'r') as f:
+    CURRENT_FOLDER = dirname(abspath(__file__))
+    ROOT_FOLDER = CURRENT_FOLDER
+    with open(ROOT_FOLDER + '/../login/weibo/accunts.txt', 'r') as f:
         for line in f.readlines():
             set(line.strip('\n'))
             print(line)
