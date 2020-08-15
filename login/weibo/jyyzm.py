@@ -25,7 +25,6 @@ class HuXiu(object):
 
     def visit_index(self):
         self.driver.get(Main_url)
-
         WebDriverWait(self.driver, 10, 0.5).until(EC.element_to_be_clickable((By.XPATH, Register_Button_Xpath)))
         reg_element = self.driver.find_element_by_xpath(Register_Button_Xpath)
         reg_element.click()
@@ -85,6 +84,7 @@ class HuXiu(object):
             self.analog_drag()
         else:
             # 成功后输入手机号，发送验证码
+            print('请输入手机号开始注册...')
             self.register()
 
     # 获取图片和位置列表
@@ -226,7 +226,3 @@ if __name__ == "__main__":
     h = HuXiu()
     h.visit_index()
 
-# 作者：星星在线
-# 链接：https: // www.jianshu.com / p / c8df1194b514
-# 來源：简书
-# 简书著作权归作者所有，任何形式的转载都请联系作者获得授权并注明出处。

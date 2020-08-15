@@ -2,7 +2,8 @@
 ChromeDriverPath = r"E:\InstallLocation\Chrome\_71_0_3578\chromedriver.exe"
 
 # 需要破解的网址
-Main_url = "https://www.huxiu.com/"
+# Main_url = "https://www.huxiu.com/"
+Main_url = "https://www.huxiu.com/app"
 
 # 呼出验证码的按钮对应的网页元素，XPATH的形式
 Register_Button_Xpath = '//*[@class="js-register"]'
