@@ -7,6 +7,7 @@ from cookiespool.db import RedisClient
 from login.weibo.cookies import WeiboCookies
 import time
 import os
+from cookiespool.config import PHANTOMJS_HOST
 
 
 class CookiesGenerator(object):
@@ -36,9 +37,10 @@ class CookiesGenerator(object):
             'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/57.0.2987.133 Safari/537.36'
         if BROWSER_TYPE == 'PhantomJS':
             if self.host:
-                self.browser = webdriver.Remote(
-                    # command_executor='http://192.168.0.112:8910', desired_capabilities=caps)
-                    command_executor='http://{}:8910'.format(PHANTOMJS_HOST_DOCKER), desired_capabilities=self.caps)
+                # self.browser = webdriver.Remote(
+                    # command_executor='http://{}:8910'.format(PHANTOMJS_HOST), desired_capabilities=self.caps)
+                self.browser = webdriver.PhantomJS(desired_capabilities=self.caps)
+
             else:
                 self.browser = webdriver.PhantomJS(desired_capabilities=self.caps)
             # self.browser.set_window_size(1400, 500)
